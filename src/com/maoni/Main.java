@@ -3,6 +3,7 @@ package com.maoni;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
+import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL33;
 
 public class Main {
@@ -19,18 +20,21 @@ public class Main {
 	}
 	
 	private static void render() {
-		// TODO Auto-generated method stub
+		GL11.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
 		
 	}
 
-	public static void init() {
+	private static void init() {
 		try {
+			int width = 800;
+			int height = 600;
 			
-			Display.setDisplayMode(new DisplayMode(800, 600));
+			Display.setDisplayMode(new DisplayMode(width, height));
 			Display.setVSyncEnabled(true);
 			Display.setTitle("Maoni V0.01");
 			Display.create();
-			
+			GL11.glViewport(0, 0, width, height);
 		} catch (LWJGLException e) {
 			e.printStackTrace();
 		}
