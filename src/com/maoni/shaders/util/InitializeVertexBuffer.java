@@ -14,6 +14,7 @@ public enum InitializeVertexBuffer {
 		FloatBuffer fb = BufferUtils.createFloatBuffer(vertices.length);
 		fb.put(vertices);
 		fb.flip();
+		
 		glBindBuffer(GL_ARRAY_BUFFER, positionBufferObject);
 		glBufferData(positionBufferObject, fb, GL_STATIC_DRAW);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);

@@ -9,7 +9,6 @@ import org.lwjgl.opengl.DisplayMode;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL20.*;
-import static org.lwjgl.opengl.GL30.*;
 
 import com.maoni.shaders.util.CreateProgram;
 import com.maoni.shaders.util.CreateShader;
@@ -21,7 +20,7 @@ public class Main {
 	private static final String _VERTEX_SHADER_LOCATION = "C:\\Users\\Alistair\\Code\\Maoni\\src\\com\\maoni\\shaders\\normalProt.vert.shader";
 	private static final String _FRAGMENT_SHADER_LOCATION = "C:\\Users\\Alistair\\Code\\Maoni\\src\\com\\maoni\\shaders\\normalProt.frag.shader";
 	private static int _PROGRAM;
-	private static int pbo;
+	private static int _PBO;
 	private static int vao;
 	private static final float vertexPositions[] = {
 			0.75f, 0.75f, 0.0f, 1.0f,
@@ -32,8 +31,8 @@ public class Main {
 	public static void main (String args[]) {
 		init();
 		while (!Display.isCloseRequested()) {
-			Display.sync(60);
 			render();
+			Display.sync(60);
 		}
 		Display.destroy();
 		System.out.println("Closed Display.");
@@ -41,11 +40,11 @@ public class Main {
 	
 	private static void render() {
 		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-		glClear(GL_COLOR_BUFFER_BIT);		
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);		
 
 		glUseProgram(_PROGRAM);
 
-		glBindBuffer(GL_ARRAY_BUFFER, pbo);
+		glBindBuffer(GL_ARRAY_BUFFER, _PBO);
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(0, 4, GL_FLOAT, false, 0, 0);
 		glDrawArrays(GL_TRIANGLES, 0, 3);
@@ -72,11 +71,7 @@ public class Main {
 			_PROGRAM = CreateProgram.INSTANCE.create(shaderList);
 			
 			// Setup the PositionBufferObject
-			pbo = InitializeVertexBuffer.INSTANCE.createPositionBufferObject(vertexPositions);
-			
-			// Get some space for a vertex array object
-			vao = glGenVertexArrays();
-			glBindVertexArray(vao);
+			_PBO = InitializeVertexBuffer.INSTANCE.createPositionBufferObject(vertexPositions);
 			
 			glViewport(0, 0, width, height);
 		} catch (LWJGLException e) {

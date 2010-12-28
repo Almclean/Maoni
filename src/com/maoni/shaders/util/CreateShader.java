@@ -27,7 +27,7 @@ public enum CreateShader {
 		buf.put(shaderSource.getBytes());
 		
 		// Important, sets the buffer back to the beginning following the put
-		buf.clear();
+		buf.flip();
 		
 		GL20.glShaderSource(shader, buf);
 		GL20.glCompileShader(shader);
