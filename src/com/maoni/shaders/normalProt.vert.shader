@@ -1,7 +1,8 @@
 #version 330
-layout(location = 0) in vec4 position;
+
+in vec4 vVertex;
 
 void main()
 {
-	gl_Position = position;
+    gl_Position = vVertex;
 }

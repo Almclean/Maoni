@@ -9,6 +9,7 @@ import org.lwjgl.opengl.DisplayMode;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL20.*;
+import static org.lwjgl.opengl.GL30.*;
 
 import com.maoni.shaders.util.CreateProgram;
 import com.maoni.shaders.util.CreateShader;
@@ -28,6 +29,8 @@ public class Main {
 			-0.75f, -0.75f, 0.0f, 1.0f,
 		};
 	
+	private static int queryHandle;
+	
 	public static void main (String args[]) {
 		init();
 		while (!Display.isCloseRequested()) {
@@ -39,19 +42,18 @@ public class Main {
 	}
 	
 	private static void render() {
-		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);		
 
 		glUseProgram(_PROGRAM);
-
 		glBindBuffer(GL_ARRAY_BUFFER, _PBO);
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(0, 4, GL_FLOAT, false, 0, 0);
+		
 		glDrawArrays(GL_TRIANGLES, 0, 3);
 
 		glDisableVertexAttribArray(0);
 		glUseProgram(0);
-		
 		Display.update();
 	}
 
@@ -64,6 +66,10 @@ public class Main {
 			Display.setVSyncEnabled(true);
 			Display.setTitle("Maoni V0.01");
 			Display.create();
+			
+			// Create the Vao
+			vao = glGenVertexArrays();
+			glBindVertexArray(vao);
 			
 			// Setup the shader program
 			shaderList.add(CreateShader.VERTEX.load(_VERTEX_SHADER_LOCATION));
