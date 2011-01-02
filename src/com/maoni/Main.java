@@ -24,12 +24,13 @@ public class Main {
 	private static int _PBO;
 	private static int vao;
 	private static final float vertexPositions[] = {
-			0.75f, 0.75f, 0.0f, 1.0f,
-			0.75f, -0.75f, 0.0f, 1.0f,
-			-0.75f, -0.75f, 0.0f, 1.0f,
-		};
-	
-	private static int queryHandle;
+	     0.0f,    0.5f, 0.0f, 1.0f,
+	     0.5f, -0.366f, 0.0f, 1.0f,
+	    -0.5f, -0.366f, 0.0f, 1.0f,
+	     1.0f,    0.0f, 0.0f, 1.0f,
+	     0.0f,    1.0f, 0.0f, 1.0f,
+	     0.0f,    0.0f, 1.0f, 1.0f,
+	};
 	
 	public static void main (String args[]) {
 		init();
@@ -48,10 +49,10 @@ public class Main {
 		glUseProgram(_PROGRAM);
 		glBindBuffer(GL_ARRAY_BUFFER, _PBO);
 		glEnableVertexAttribArray(0);
+		glEnableVertexAttribArray(1);
 		glVertexAttribPointer(0, 4, GL_FLOAT, false, 0, 0);
-		
+		glVertexAttribPointer(1, 4, GL_FLOAT, false, 0, 48);
 		glDrawArrays(GL_TRIANGLES, 0, 3);
-
 		glDisableVertexAttribArray(0);
 		glUseProgram(0);
 		Display.update();
