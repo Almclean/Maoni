@@ -6,7 +6,7 @@ out vec4 outputColor;
 
 void main()
 {
-    float lerpValue = gl_FragCoord.y / 500.0f;
+    float lerpValue = gl_FragCoord.y / 600.0f;
     
     outputColor = theColor;
 }

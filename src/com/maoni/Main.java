@@ -9,6 +9,7 @@ import org.lwjgl.BufferUtils;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
+
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL20.*;
@@ -30,38 +31,27 @@ public class Main {
 	private static final float vertexPositions[] = {
 	     0.0f,    0.5f, 0.0f, 1.0f,
 	     0.5f, -0.366f, 0.0f, 1.0f,
-	    -0.5f, -0.366f, 0.0f, 1.0f,
+	     -0.5f, -0.366f, 0.0f, 1.0f,
 	     1.0f,    0.0f, 0.0f, 1.0f,
 	     0.0f,    1.0f, 0.0f, 1.0f,
 	     0.0f,    0.0f, 1.0f, 1.0f,
 	};
 	
-	private static FloatMatrix cameraToClipMatrix = MatrixUtil.INSTANCE.genIdentityMatrix4f();
+	private static FloatMatrix perspectiveMatrix = MatrixUtil.INSTANCE.genIdentityMatrix4f();
 	
 	
 	private static float rotAngle = 0.0f;
 	
-	public static void main (String args[]) {
-		init();
-		while (!Display.isCloseRequested()) {
-			render();
-			Display.sync(60);
-			rotAngle += 0.5f;
-			if (rotAngle > 360.0f)
-				rotAngle = 0.0f;
-		}
-		Display.destroy();
-		System.out.println("Closed Display.");
-	}
-	
 	private static void render() {
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClearDepth(1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);		
 
 		glUseProgram(_PROGRAM);
 		// Rotation Matrix.
 		int matrixUniformLoc = glGetUniformLocation(_PROGRAM, "rotMatrix");
-		FloatMatrix fRot = MatrixUtil.INSTANCE.genRotateMatrix(0.0f, 0.0f, 1.0f, rotAngle);
+		FloatMatrix fRot = MatrixUtil.INSTANCE.genIdentityMatrix4f();
+		fRot.mmuli(MatrixUtil.INSTANCE.genRotationMatrix(0.0f, 0.0f, 1.0f, -rotAngle));
 		FloatBuffer fb = BufferUtils.createFloatBuffer(fRot.length);
 		fb.put(fRot.toArray());
 		fb.flip();
@@ -89,12 +79,12 @@ public class Main {
 			
 			float frustrumScale = calcFrustrumScale(45.0f);
 			
-			cameraToClipMatrix.put(0, 0, frustrumScale);
-			cameraToClipMatrix.put(1, 1, frustrumScale);
-			cameraToClipMatrix.put(2, 2, (fzfar + fznear) / (fznear - fzfar));
-			cameraToClipMatrix.put(2, 3, -1.0f);
-			cameraToClipMatrix.put(3, 2, (2.0f * fznear * fzfar) / (fznear - fzfar));
-			cameraToClipMatrix.mmuli(MatrixUtil.INSTANCE.genTranslateMatrix(0.0f, 0.0f, -1.0f));
+			perspectiveMatrix.put(0, 0, frustrumScale * ((float) height / (float) width));
+			perspectiveMatrix.put(1, 1, frustrumScale);
+			perspectiveMatrix.put(2, 2, (fzfar + fznear) / (fznear - fzfar));
+			perspectiveMatrix.put(2, 3, -1.0f);
+			perspectiveMatrix.put(3, 2, (2.0f * fznear * fzfar) / (fznear - fzfar));
+			perspectiveMatrix.mmuli(MatrixUtil.INSTANCE.genTranslateMatrix(0.0f, 0.0f, -1.0f));
 			
 			Display.setDisplayMode(new DisplayMode(width, height));
 			Display.setVSyncEnabled(true);
@@ -112,15 +102,18 @@ public class Main {
 			
 			int cameraToClipMatrixUnif = glGetUniformLocation(_PROGRAM, "cameraMatrix");
 			glUseProgram(_PROGRAM);
-			FloatBuffer cb = BufferUtils.createFloatBuffer(cameraToClipMatrix.length);
-			cb.put(cameraToClipMatrix.toArray());
+			FloatBuffer cb = BufferUtils.createFloatBuffer(perspectiveMatrix.length);
+			cb.put(perspectiveMatrix.toArray());
 			cb.flip();
 			glUniformMatrix4(cameraToClipMatrixUnif, false, cb);
 			glUseProgram(0);
 			
 			// Setup the PositionBufferObject
 			_PBO = InitializeVertexBuffer.INSTANCE.createPositionBufferObject(vertexPositions);
-			
+			glEnable(GL_CULL_FACE);
+		    glCullFace(GL_BACK);
+		    glFrontFace(GL_CW);
+
 			glViewport(0, 0, width, height);
 		} catch (LWJGLException e) {
 			e.printStackTrace();
@@ -129,7 +122,20 @@ public class Main {
 
 	private static float calcFrustrumScale(float f) {
 		double radVersion = Math.toRadians(f);
-		return (float) (1.0 / Math.tan(radVersion / 2.0));
+		return (float) (1.0f / Math.tan(radVersion / 2.0f));
+	}
+	
+	public static void main (String args[]) {
+		init();
+		while (!Display.isCloseRequested()) {
+			render();
+			Display.sync(60);
+			rotAngle += 1.0f;
+			if (rotAngle > 360.0f)
+				rotAngle = 0.0f;
+		}
+		Display.destroy();
+		System.out.println("Closed Display.");
 	}
 
 }

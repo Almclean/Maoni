@@ -30,45 +30,59 @@ public enum MatrixUtil {
 		return FloatMatrix.diag(new FloatMatrix(vecArray));
 	}
 	
-	public FloatMatrix genRotateMatrix (float x, float y, float z, float angle) {
-		float[] vecArray = { x, y, z, 1.0f };
-		return Rotate(vecArray, angle);
-	}
-	
-	private FloatMatrix Rotate(float[] vecArray, float angle) {
-		FloatMatrix axis = Normalise(new FloatMatrix(vecArray));
-		double radVersion = Math.toRadians(angle);
-		float fcos = (float) Math.cos(radVersion);
-		float fInvCos = 1.0f - fcos;
-		float fsin = (float) Math.sin(radVersion);
-		float norm[] = axis.toArray();
+	public FloatMatrix genRotationMatrix(float x, float y, float z, float angle) {
+		float mag, s, c;
+		float xx, yy, zz, xy, yz, zx, xs, ys, zs, one_c;
 		
-		FloatMatrix i = genIdentityMatrix4f();
-		// x vals
-		float x0Val = (norm[0] * norm[0]) + ((1 - norm[0] * norm[0]) * fcos); 
-		float x1Val = norm[0] * norm[1] * (fInvCos) - (norm[2] * fsin);
-		float x2Val = norm[0] * norm[2] * (fInvCos) + (norm[1] * fsin);
-		i.put(0, 0, x0Val);
-		i.put(0, 1, x1Val);
-		i.put(0, 2, x2Val);
+		float radAngle = (float) Math.toRadians(angle);
+		s = (float) Math.sin(radAngle);
+		c = (float) Math.cos(radAngle);
+
+		mag = (float) Math.sqrt( x*x + y*y + z*z );
+
+		// Identity matrix
+		if (mag == 0.0f) {
+			return genIdentityMatrix4f();
+		}
+
+		// Rotation matrix is normalized
+		x /= mag;
+		y /= mag;
+		z /= mag;
+
+		xx = x * x;
+		yy = y * y;
+		zz = z * z;
+		xy = x * y;
+		yz = y * z;
+		zx = z * x;
+		xs = x * s;
+		ys = y * s;
+		zs = z * s;
+		one_c = 1.0f - c;
 		
-		// y vals
-		float y0Val = norm[0] * norm[1] * (fInvCos) + (norm[2] * fsin);
-		float y1Val = (norm[1] * norm[1]) + ((1 - norm[1] * norm[1]) * fcos);
-		float y2Val = norm[1] * norm[2] * (fInvCos) - (norm[0] * fsin);
-		i.put(1, 0, y0Val);
-		i.put(1, 1, y1Val);
-		i.put(1, 2, y2Val);
-			
-	    // z vals
-		float z0Val = norm[0] * norm[2] * (fInvCos) - (norm[1] * fsin);
-		float z1Val = norm[1] * norm[2] * (fInvCos) - (norm[0] * fsin);
-		float z2Val = (norm[2] * norm[2]) + ((1 - norm[2] * norm[2]) * fcos);
-		i.put(2, 0, z0Val);
-		i.put(2, 1, z1Val);
-		i.put(2, 2, z2Val);
-			
-		return i;
+		FloatMatrix M = genIdentityMatrix4f();
+		
+		M.put(0, 0,(one_c * xx) + c);
+		M.put(0, 1, (one_c * xy) - zs);
+		M.put(0, 2, (one_c * zx) + ys);
+		M.put(0, 3, 0.0f);
+
+		M.put(1, 0, (one_c * xy) + zs);
+		M.put(1, 1, (one_c * yy) + c);
+		M.put(1, 2, (one_c * yz) - xs);
+		M.put(1, 3, 0.0f);
+
+		M.put(2, 0, (one_c * zx) - ys);
+		M.put(2, 1, (one_c * yz) + xs);
+		M.put(2, 2, (one_c * zz) + c);
+		M.put(2, 3, 0.0f);
+
+		M.put(3, 0, 0.0f);
+		M.put(3, 1, 0.0f);
+		M.put(3, 2, 0.0f);
+		M.put(3, 3, 1.0f);
+		return M;
 	}
 	
 	public FloatMatrix Multiply(FloatMatrix... matrices) {
