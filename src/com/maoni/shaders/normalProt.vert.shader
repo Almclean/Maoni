@@ -5,8 +5,10 @@ layout (location = 1) in vec4 color;
 
 smooth out vec4 theColor;
 
+uniform mat4 rotMatrix;
+
 void main()
 {
-    gl_Position = position;
+    gl_Position = rotMatrix * position;
     theColor = color;
 }

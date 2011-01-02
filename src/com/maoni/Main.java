@@ -1,8 +1,11 @@
 package com.maoni;
 
+import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jblas.FloatMatrix;
+import org.lwjgl.BufferUtils;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
@@ -11,6 +14,7 @@ import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL30.*;
 
+import com.maoni.matrix.MatrixUtil;
 import com.maoni.shaders.util.CreateProgram;
 import com.maoni.shaders.util.CreateShader;
 import com.maoni.shaders.util.InitializeVertexBuffer;
@@ -32,11 +36,14 @@ public class Main {
 	     0.0f,    0.0f, 1.0f, 1.0f,
 	};
 	
+	private static float rotAngle = 0.0f;
+	
 	public static void main (String args[]) {
 		init();
 		while (!Display.isCloseRequested()) {
 			render();
 			Display.sync(60);
+			rotAngle += 0.1f;
 		}
 		Display.destroy();
 		System.out.println("Closed Display.");
@@ -47,6 +54,15 @@ public class Main {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);		
 
 		glUseProgram(_PROGRAM);
+		// Rotation Matrix.
+		int matrixUniformLoc = glGetUniformLocation(_PROGRAM, "rotMatrix");
+		FloatMatrix fRot = MatrixUtil.INSTANCE.genRotateMatrix(0.0f, 1.0f, 0.0f, rotAngle);
+		FloatBuffer fb = BufferUtils.createFloatBuffer(fRot.length);
+		fb.put(fRot.toArray());
+		fb.flip();
+		
+		glUniformMatrix4(matrixUniformLoc, false, fb);
+		
 		glBindBuffer(GL_ARRAY_BUFFER, _PBO);
 		glEnableVertexAttribArray(0);
 		glEnableVertexAttribArray(1);

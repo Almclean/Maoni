@@ -70,6 +70,15 @@ public enum MatrixUtil {
 			
 		return i;
 	}
+	
+	public FloatMatrix Multiply(FloatMatrix... matrices) {
+		FloatMatrix i = genIdentityMatrix4f();
+		
+		for (FloatMatrix f : matrices) {
+			i.mmuli(f);
+		}
+		return i;
+	}
 
 	public FloatMatrix Normalise(final FloatMatrix f) {
 		return Geometry.normalize(f);
