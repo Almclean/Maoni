@@ -36,6 +36,9 @@ public class Main {
 	     0.0f,    0.0f, 1.0f, 1.0f,
 	};
 	
+	private static FloatMatrix cameraToClipMatrix = MatrixUtil.INSTANCE.genIdentityMatrix4f();
+	
+	
 	private static float rotAngle = 0.0f;
 	
 	public static void main (String args[]) {
@@ -43,7 +46,9 @@ public class Main {
 		while (!Display.isCloseRequested()) {
 			render();
 			Display.sync(60);
-			rotAngle += 0.1f;
+			rotAngle += 0.5f;
+			if (rotAngle > 360.0f)
+				rotAngle = 0.0f;
 		}
 		Display.destroy();
 		System.out.println("Closed Display.");
@@ -56,7 +61,7 @@ public class Main {
 		glUseProgram(_PROGRAM);
 		// Rotation Matrix.
 		int matrixUniformLoc = glGetUniformLocation(_PROGRAM, "rotMatrix");
-		FloatMatrix fRot = MatrixUtil.INSTANCE.genRotateMatrix(0.0f, 1.0f, 0.0f, rotAngle);
+		FloatMatrix fRot = MatrixUtil.INSTANCE.genRotateMatrix(0.0f, 0.0f, 1.0f, rotAngle);
 		FloatBuffer fb = BufferUtils.createFloatBuffer(fRot.length);
 		fb.put(fRot.toArray());
 		fb.flip();
@@ -79,6 +84,18 @@ public class Main {
 			int width = 800;
 			int height = 600;
 			
+			float fznear = 1.0f;
+			float fzfar = 100.0f;
+			
+			float frustrumScale = calcFrustrumScale(45.0f);
+			
+			cameraToClipMatrix.put(0, 0, frustrumScale);
+			cameraToClipMatrix.put(1, 1, frustrumScale);
+			cameraToClipMatrix.put(2, 2, (fzfar + fznear) / (fznear - fzfar));
+			cameraToClipMatrix.put(2, 3, -1.0f);
+			cameraToClipMatrix.put(3, 2, (2.0f * fznear * fzfar) / (fznear - fzfar));
+			cameraToClipMatrix.mmuli(MatrixUtil.INSTANCE.genTranslateMatrix(0.0f, 0.0f, -1.0f));
+			
 			Display.setDisplayMode(new DisplayMode(width, height));
 			Display.setVSyncEnabled(true);
 			Display.setTitle("Maoni V0.01");
@@ -93,6 +110,14 @@ public class Main {
 			shaderList.add(CreateShader.FRAGMENT.load(_FRAGMENT_SHADER_LOCATION));
 			_PROGRAM = CreateProgram.INSTANCE.create(shaderList);
 			
+			int cameraToClipMatrixUnif = glGetUniformLocation(_PROGRAM, "cameraMatrix");
+			glUseProgram(_PROGRAM);
+			FloatBuffer cb = BufferUtils.createFloatBuffer(cameraToClipMatrix.length);
+			cb.put(cameraToClipMatrix.toArray());
+			cb.flip();
+			glUniformMatrix4(cameraToClipMatrixUnif, false, cb);
+			glUseProgram(0);
+			
 			// Setup the PositionBufferObject
 			_PBO = InitializeVertexBuffer.INSTANCE.createPositionBufferObject(vertexPositions);
 			
@@ -100,6 +125,11 @@ public class Main {
 		} catch (LWJGLException e) {
 			e.printStackTrace();
 		}
+	}
+
+	private static float calcFrustrumScale(float f) {
+		double radVersion = Math.toRadians(f);
+		return (float) (1.0 / Math.tan(radVersion / 2.0));
 	}
 
 }

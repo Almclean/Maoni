@@ -6,9 +6,11 @@ layout (location = 1) in vec4 color;
 smooth out vec4 theColor;
 
 uniform mat4 rotMatrix;
+uniform mat4 cameraMatrix;
 
 void main()
 {
-    gl_Position = rotMatrix * position;
+    vec4 cameraPos = rotMatrix * position;
+    gl_Position = cameraMatrix * cameraPos;
     theColor = color;
 }
