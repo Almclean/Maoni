@@ -7,6 +7,8 @@ import java.util.List;
 import org.jblas.FloatMatrix;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.LWJGLException;
+import org.lwjgl.input.Keyboard;
+import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 
@@ -42,6 +44,8 @@ public class Main {
 	
 	private static float rotAngle = 0.0f;
 	private static int matrixUniformLoc;
+	private static float xpos = 0.0f;
+	private static float ypos = 0.0f;
 	
 	private static void render() {
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -50,7 +54,7 @@ public class Main {
 
 		glUseProgram(_PROGRAM);
 		// Rotation Matrix.
-		FloatMatrix fRot = MatrixUtil.INSTANCE.Multiply(MatrixUtil.INSTANCE.genRotationMatrix(1.0f, 1.0f, 1.0f, -rotAngle));
+		FloatMatrix fRot = MatrixUtil.INSTANCE.Multiply(MatrixUtil.INSTANCE.genTranslateMatrix((xpos - 400.0f) / 800.0f, (ypos - 300.0f) / 600.0f, 0.0f));
 		FloatBuffer fb = BufferUtils.createFloatBuffer(fRot.length);
 		fb.put(fRot.toArray());
 		fb.flip();
@@ -67,6 +71,20 @@ public class Main {
 		glUseProgram(0);
 		Display.update();
 	}
+	
+	  private static void logic() {
+		    // Example input handler: we'll check for the ESC key and finish the game instantly when it's pressed
+		    if (Keyboard.isKeyDown(Keyboard.KEY_ESCAPE)) {
+		      Display.destroy();
+		      System.exit(0);
+		    }		    
+		    
+		    if (Mouse.isButtonDown(0)) {
+		    	xpos = Mouse.getX();
+		    	ypos = Mouse.getY();
+		    }
+		  }
+
 
 	private static void init() {
 		try {
@@ -91,7 +109,7 @@ public class Main {
 			Display.setVSyncEnabled(true);
 			Display.setTitle("Maoni V0.01");
 			Display.create();
-			
+			Mouse.create();
 			// Create the Vao
 			vao = glGenVertexArrays();
 			glBindVertexArray(vao);
@@ -126,13 +144,11 @@ public class Main {
 	
 	public static void main (String args[]) {
 		init();
+		Display.setVSyncEnabled(true);
 		while (!Display.isCloseRequested()) {
 			render();
 			Display.sync(60);
-	
-			rotAngle += 1.0f;
-			if (rotAngle > 360.0f)
-				rotAngle = 0.0f;
+			logic();
 		}
 		Display.destroy();
 		System.out.println("Closed Display.");
