@@ -1,4 +1,4 @@
-package com.maoni.shaders.util;
+package com.maoni.vBuffer;
 
 import java.nio.FloatBuffer;
 

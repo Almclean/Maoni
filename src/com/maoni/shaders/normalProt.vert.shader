@@ -1,16 +1,16 @@
 #version 330
 
-layout(location = 0) in vec4 position;
+layout(location = 0) in vec4 vVector;
 layout(location = 1) in vec4 color;
 
 smooth out vec4 theColor;
 
-uniform mat4 cameraMatrix;
-uniform mat4 rotMatrix;
+uniform mat4 pMatrix;
+uniform mat4 mvMatrix;
 
 void main()
 {
-    vec4 cameraPos = rotMatrix * position;
-    gl_Position = cameraMatrix * cameraPos;
+    mat4 mvpMatrix = mvMatrix * pMatrix;
+    gl_Position = mvpMatrix * vVector;
     theColor = color;
 }

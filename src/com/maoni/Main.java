@@ -18,7 +18,7 @@ import static org.lwjgl.opengl.GL30.*;
 import com.maoni.matrix.MatrixUtil;
 import com.maoni.shaders.util.CreateProgram;
 import com.maoni.shaders.util.CreateShader;
-import com.maoni.shaders.util.InitializeVertexBuffer;
+import com.maoni.vBuffer.InitializeVertexBuffer;
 
 public class Main {
 	
@@ -41,6 +41,7 @@ public class Main {
 	
 	
 	private static float rotAngle = 0.0f;
+	private static int matrixUniformLoc;
 	
 	private static void render() {
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -49,9 +50,7 @@ public class Main {
 
 		glUseProgram(_PROGRAM);
 		// Rotation Matrix.
-		int matrixUniformLoc = glGetUniformLocation(_PROGRAM, "rotMatrix");
-		FloatMatrix fRot = MatrixUtil.INSTANCE.genIdentityMatrix4f();
-		fRot.mmuli(MatrixUtil.INSTANCE.genRotationMatrix(0.0f, 0.0f, 1.0f, -rotAngle));
+		FloatMatrix fRot = MatrixUtil.INSTANCE.Multiply(MatrixUtil.INSTANCE.genRotationMatrix(1.0f, 1.0f, 1.0f, -rotAngle));
 		FloatBuffer fb = BufferUtils.createFloatBuffer(fRot.length);
 		fb.put(fRot.toArray());
 		fb.flip();
@@ -84,6 +83,8 @@ public class Main {
 			perspectiveMatrix.put(2, 2, (fzfar + fznear) / (fznear - fzfar));
 			perspectiveMatrix.put(2, 3, -1.0f);
 			perspectiveMatrix.put(3, 2, (2.0f * fznear * fzfar) / (fznear - fzfar));
+			
+			// Move out a bit.
 			perspectiveMatrix.mmuli(MatrixUtil.INSTANCE.genTranslateMatrix(0.0f, 0.0f, -1.0f));
 			
 			Display.setDisplayMode(new DisplayMode(width, height));
@@ -100,7 +101,8 @@ public class Main {
 			shaderList.add(CreateShader.FRAGMENT.load(_FRAGMENT_SHADER_LOCATION));
 			_PROGRAM = CreateProgram.INSTANCE.create(shaderList);
 			
-			int cameraToClipMatrixUnif = glGetUniformLocation(_PROGRAM, "cameraMatrix");
+			int cameraToClipMatrixUnif = glGetUniformLocation(_PROGRAM, "pMatrix");
+			matrixUniformLoc = glGetUniformLocation(_PROGRAM, "mvMatrix");
 			glUseProgram(_PROGRAM);
 			FloatBuffer cb = BufferUtils.createFloatBuffer(perspectiveMatrix.length);
 			cb.put(perspectiveMatrix.toArray());
@@ -110,9 +112,6 @@ public class Main {
 			
 			// Setup the PositionBufferObject
 			_PBO = InitializeVertexBuffer.INSTANCE.createPositionBufferObject(vertexPositions);
-			glEnable(GL_CULL_FACE);
-		    glCullFace(GL_BACK);
-		    glFrontFace(GL_CW);
 
 			glViewport(0, 0, width, height);
 		} catch (LWJGLException e) {
@@ -130,6 +129,7 @@ public class Main {
 		while (!Display.isCloseRequested()) {
 			render();
 			Display.sync(60);
+	
 			rotAngle += 1.0f;
 			if (rotAngle > 360.0f)
 				rotAngle = 0.0f;
