@@ -5,12 +5,10 @@ layout(location = 1) in vec4 color;
 
 smooth out vec4 theColor;
 
-uniform mat4 pMatrix;
-uniform mat4 mvMatrix;
+uniform mat4 mvpMatrix;
 
 void main()
 {
-    mat4 mvpMatrix = mvMatrix * pMatrix;
     gl_Position = mvpMatrix * vVector;
     theColor = color;
 }

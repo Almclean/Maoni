@@ -1,11 +1,9 @@
 package com.maoni;
 
-import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.jblas.FloatMatrix;
-import org.lwjgl.BufferUtils;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
@@ -17,6 +15,7 @@ import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL30.*;
 
+import com.maoni.matrix.MatrixStack;
 import com.maoni.matrix.MatrixUtil;
 import com.maoni.shaders.util.CreateProgram;
 import com.maoni.shaders.util.CreateShader;
@@ -38,29 +37,22 @@ public class Main {
 	     0.0f,    1.0f, 0.0f, 1.0f,
 	     0.0f,    0.0f, 1.0f, 1.0f,
 	};
-	
 	private static FloatMatrix perspectiveMatrix = MatrixUtil.INSTANCE.genIdentityMatrix4f();
-	
-	
+	private static MatrixStack transformStack = new MatrixStack();
 	private static float rotAngle = 0.0f;
 	private static int matrixUniformLoc;
-	private static float xpos = 0.0f;
-	private static float ypos = 0.0f;
 	
 	private static void render() {
+		
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClearDepth(1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);		
 
 		glUseProgram(_PROGRAM);
-		// Rotation Matrix.
-		FloatMatrix fRot = MatrixUtil.INSTANCE.Multiply(MatrixUtil.INSTANCE.genTranslateMatrix((xpos - 400.0f) / 800.0f, (ypos - 300.0f) / 600.0f, 0.0f));
-		FloatBuffer fb = BufferUtils.createFloatBuffer(fRot.length);
-		fb.put(fRot.toArray());
-		fb.flip();
-		
-		glUniformMatrix4(matrixUniformLoc, false, fb);
-		
+		transformStack.push(perspectiveMatrix);
+		transformStack.push(MatrixUtil.INSTANCE.genRotationMatrix(0.0f, 0.0f, 1.0f, -rotAngle));
+		glUniformMatrix4(matrixUniformLoc, false, MatrixUtil.INSTANCE.genBuffer(transformStack.getModelViewProjection()));
+
 		glBindBuffer(GL_ARRAY_BUFFER, _PBO);
 		glEnableVertexAttribArray(0);
 		glEnableVertexAttribArray(1);
@@ -69,6 +61,10 @@ public class Main {
 		glDrawArrays(GL_TRIANGLES, 0, 3);
 		glDisableVertexAttribArray(0);
 		glUseProgram(0);
+		
+		// reset the transformStack.
+		transformStack.pop();
+		transformStack.pop();
 		Display.update();
 	}
 	
@@ -78,11 +74,6 @@ public class Main {
 		      Display.destroy();
 		      System.exit(0);
 		    }		    
-		    
-		    if (Mouse.isButtonDown(0)) {
-		    	xpos = Mouse.getX();
-		    	ypos = Mouse.getY();
-		    }
 		  }
 
 
@@ -92,7 +83,7 @@ public class Main {
 			int height = 600;
 			
 			float fznear = 1.0f;
-			float fzfar = 100.0f;
+			float fzfar = 1000.0f;
 			
 			float frustrumScale = calcFrustrumScale(45.0f);
 			
@@ -119,15 +110,6 @@ public class Main {
 			shaderList.add(CreateShader.FRAGMENT.load(_FRAGMENT_SHADER_LOCATION));
 			_PROGRAM = CreateProgram.INSTANCE.create(shaderList);
 			
-			int cameraToClipMatrixUnif = glGetUniformLocation(_PROGRAM, "pMatrix");
-			matrixUniformLoc = glGetUniformLocation(_PROGRAM, "mvMatrix");
-			glUseProgram(_PROGRAM);
-			FloatBuffer cb = BufferUtils.createFloatBuffer(perspectiveMatrix.length);
-			cb.put(perspectiveMatrix.toArray());
-			cb.flip();
-			glUniformMatrix4(cameraToClipMatrixUnif, false, cb);
-			glUseProgram(0);
-			
 			// Setup the PositionBufferObject
 			_PBO = InitializeVertexBuffer.INSTANCE.createPositionBufferObject(vertexPositions);
 
@@ -148,6 +130,7 @@ public class Main {
 		while (!Display.isCloseRequested()) {
 			render();
 			Display.sync(60);
+			rotAngle += 1.0f % 360.0f;
 			logic();
 		}
 		Display.destroy();

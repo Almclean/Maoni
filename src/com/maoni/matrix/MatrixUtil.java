@@ -1,7 +1,10 @@
 package com.maoni.matrix;
 
+import java.nio.FloatBuffer;
+
 import org.jblas.FloatMatrix;
 import org.jblas.Geometry;
+import org.lwjgl.BufferUtils;
 
 public enum MatrixUtil {
 	INSTANCE;
@@ -10,23 +13,23 @@ public enum MatrixUtil {
 		return FloatMatrix.eye(4);
 	}
 	
-	public FloatMatrix genTranslateMatrix(float x, float y, float z) {
+	public FloatMatrix genTranslateMatrix(final float x, final float y, final float z) {
 		float[] vecArray = { x, y, z, 1.0f };
 		return Translate(vecArray);
 	}
 
-	private FloatMatrix Translate(float[] vecArray) {
+	private FloatMatrix Translate(final float[] vecArray) {
 		FloatMatrix f = genIdentityMatrix4f();
 		f.putColumn(3, new FloatMatrix(vecArray));
 		return f;
 	}
 	
-	public FloatMatrix genScaleMatrix(float x, float y, float z) {
+	public FloatMatrix genScaleMatrix(final float x, float y, float z) {
 		float[] vecArray = { x, y, z, 1.0f };
 		return Scale(vecArray);
 	}
 	
-	private FloatMatrix Scale(float[] vecArray) {
+	private FloatMatrix Scale(final float[] vecArray) {
 		return FloatMatrix.diag(new FloatMatrix(vecArray));
 	}
 	
@@ -85,13 +88,20 @@ public enum MatrixUtil {
 		return rotMatrix;
 	}
 	
-	public FloatMatrix Multiply(FloatMatrix... matrices) {
+	public FloatMatrix Multiply(final FloatMatrix... matrices) {
 		FloatMatrix i = genIdentityMatrix4f();
 		
 		for (FloatMatrix f : matrices) {
 			i.mmuli(f);
 		}
 		return i;
+	}
+	
+	public FloatBuffer genBuffer(final FloatMatrix f) {
+		final FloatBuffer fb = BufferUtils.createFloatBuffer(16);
+		fb.put(f.toArray());
+		fb.flip();
+		return fb;
 	}
 
 	public FloatMatrix Normalise(final FloatMatrix f) {
