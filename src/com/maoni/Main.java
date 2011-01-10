@@ -69,7 +69,7 @@ public class Main {
 	}
 	
 	  private static void logic() {
-		    // Example input handler: we'll check for the ESC key and finish the game instantly when it's pressed
+
 		    if (Keyboard.isKeyDown(Keyboard.KEY_ESCAPE)) {
 		      Display.destroy();
 		      System.exit(0);
