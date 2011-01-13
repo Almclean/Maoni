@@ -17,41 +17,41 @@ import static org.lwjgl.opengl.GL30.*;
 
 import com.maoni.matrix.MatrixStack;
 import com.maoni.matrix.MatrixUtil;
+import com.maoni.matrix.ViewPoint;
 import com.maoni.shaders.util.CreateProgram;
 import com.maoni.shaders.util.CreateShader;
 import com.maoni.vBuffer.InitializeVertexBuffer;
 
 public class Main {
-	
+
 	private static final List<Integer> shaderList = new ArrayList<Integer>();
 	private static final String _VERTEX_SHADER_LOCATION = "C:\\Users\\Alistair\\Code\\Maoni\\src\\com\\maoni\\shaders\\normalProt.vert.shader";
 	private static final String _FRAGMENT_SHADER_LOCATION = "C:\\Users\\Alistair\\Code\\Maoni\\src\\com\\maoni\\shaders\\normalProt.frag.shader";
 	private static int _PROGRAM;
 	private static int _PBO;
 	private static int vao;
-	private static final float vertexPositions[] = {
-	     0.0f,    0.5f, 0.0f, 1.0f,
-	     0.5f, -0.366f, 0.0f, 1.0f,
-	     -0.5f, -0.366f, 0.0f, 1.0f,
-	     1.0f,    0.0f, 0.0f, 1.0f,
-	     0.0f,    1.0f, 0.0f, 1.0f,
-	     0.0f,    0.0f, 1.0f, 1.0f,
-	};
-	private static FloatMatrix perspectiveMatrix = MatrixUtil.INSTANCE.genIdentityMatrix4f();
+	private static final float vertexPositions[] = { 0.0f, 0.5f, 0.0f, 1.0f,
+		0.5f, -0.366f, 0.0f, 1.0f, -0.5f, -0.366f, 0.0f, 1.0f, 1.0f, 0.0f,
+		0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, };
+	private static FloatMatrix perspectiveMatrix;
 	private static MatrixStack transformStack = new MatrixStack();
 	private static float rotAngle = 0.0f;
 	private static int matrixUniformLoc;
-	
+
 	private static void render() {
-		
+
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClearDepth(1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);		
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		glUseProgram(_PROGRAM);
 		transformStack.push(perspectiveMatrix);
-		transformStack.push(MatrixUtil.INSTANCE.genRotationMatrix(0.0f, 0.0f, 1.0f, -rotAngle));
-		glUniformMatrix4(matrixUniformLoc, false, MatrixUtil.INSTANCE.genBuffer(transformStack.getModelViewProjection()));
+		transformStack.push(MatrixUtil.INSTANCE.genRotationMatrix(1.0f, 1.0f,
+				1.0f, -rotAngle));
+
+		glUniformMatrix4(matrixUniformLoc, false,
+				MatrixUtil.INSTANCE.genBuffer(transformStack
+						.getModelViewProjection()));
 
 		glBindBuffer(GL_ARRAY_BUFFER, _PBO);
 		glEnableVertexAttribArray(0);
@@ -61,41 +61,33 @@ public class Main {
 		glDrawArrays(GL_TRIANGLES, 0, 3);
 		glDisableVertexAttribArray(0);
 		glUseProgram(0);
-		
+
 		// reset the transformStack.
 		transformStack.pop();
 		transformStack.pop();
 		Display.update();
 	}
-	
-	  private static void logic() {
 
-		    if (Keyboard.isKeyDown(Keyboard.KEY_ESCAPE)) {
-		      Display.destroy();
-		      System.exit(0);
-		    }		    
-		  }
+	private static void logic() {
 
+		if (Keyboard.isKeyDown(Keyboard.KEY_ESCAPE)) {
+			Display.destroy();
+			System.exit(0);
+		}
+	}
 
 	private static void init() {
 		try {
-			int width = 800;
-			int height = 600;
-			
+			int width = 1024;
+			int height = 768;
+
 			float fznear = 1.0f;
 			float fzfar = 1000.0f;
-			
-			float frustrumScale = calcFrustrumScale(45.0f);
-			
-			perspectiveMatrix.put(0, 0, frustrumScale * ((float) height / (float) width));
-			perspectiveMatrix.put(1, 1, frustrumScale);
-			perspectiveMatrix.put(2, 2, (fzfar + fznear) / (fznear - fzfar));
-			perspectiveMatrix.put(2, 3, -1.0f);
-			perspectiveMatrix.put(3, 2, (2.0f * fznear * fzfar) / (fznear - fzfar));
-			
-			// Move out a bit.
+
+			perspectiveMatrix = ViewPoint.INSTANCE.getPerspectiveMatrix(height,
+					width, fznear, fzfar, 45.0f);
 			perspectiveMatrix.mmuli(MatrixUtil.INSTANCE.genTranslateMatrix(0.0f, 0.0f, -1.0f));
-			
+
 			Display.setDisplayMode(new DisplayMode(width, height));
 			Display.setVSyncEnabled(true);
 			Display.setTitle("Maoni V0.01");
@@ -104,14 +96,15 @@ public class Main {
 			// Create the Vao
 			vao = glGenVertexArrays();
 			glBindVertexArray(vao);
-			
+
 			// Setup the shader program
 			shaderList.add(CreateShader.VERTEX.load(_VERTEX_SHADER_LOCATION));
 			shaderList.add(CreateShader.FRAGMENT.load(_FRAGMENT_SHADER_LOCATION));
 			_PROGRAM = CreateProgram.INSTANCE.create(shaderList);
-			
+
 			// Setup the PositionBufferObject
-			_PBO = InitializeVertexBuffer.INSTANCE.createPositionBufferObject(vertexPositions);
+			_PBO = InitializeVertexBuffer.INSTANCE
+			.createPositionBufferObject(vertexPositions);
 
 			glViewport(0, 0, width, height);
 		} catch (LWJGLException e) {
@@ -119,12 +112,7 @@ public class Main {
 		}
 	}
 
-	private static float calcFrustrumScale(float f) {
-		double radVersion = Math.toRadians(f);
-		return (float) (1.0f / Math.tan(radVersion / 2.0f));
-	}
-	
-	public static void main (String args[]) {
+	public static void main(String args[]) {
 		init();
 		Display.setVSyncEnabled(true);
 		while (!Display.isCloseRequested()) {
