@@ -34,8 +34,8 @@ public class ShaderProgramLinkerTests {
 	
 	@Test
 	public void testThatShaderProgramsAreLinkedCorrectly() {
-		int vertex = CreateShader.VERTEX.load("C:\\Users\\Alistair\\Code\\Maoni\\src\\com\\maoni\\shaders\\normalProt.vert.shader");
-		int frag = CreateShader.FRAGMENT.load("C:\\Users\\Alistair\\Code\\Maoni\\src\\com\\maoni\\shaders\\normalProt.frag.shader");
+		int vertex = CreateShader.VERTEX.load(ClassLoader.getSystemResourceAsStream("com/maoni/shaders/normalProt.vert.shader"));
+		int frag = CreateShader.FRAGMENT.load(ClassLoader.getSystemResourceAsStream("com/maoni/shaders/normalProt.frag.shader"));
 		
 		List<Integer> shaderList = new ArrayList<Integer>();
 		shaderList.add(vertex);

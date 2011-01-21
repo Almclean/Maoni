@@ -30,13 +30,13 @@ public class ShaderLoaderTests {
 	
 	@Test
 	public void testThatShaderLoadsAVertexShaderAndReturnsCorrectly() {
-		int result = CreateShader.VERTEX.load("C:\\Users\\Alistair\\Code\\Maoni\\src\\com\\maoni\\shaders\\normalProt.vert.shader");
+		int result = CreateShader.VERTEX.load(ClassLoader.getSystemResourceAsStream("com/maoni/shaders/normalProt.vert.shader"));
 		assertTrue(result != 0);
 	}
 	
 	@Test
 	public void testThatTheShaderLoadsAFragmentShaderAndReturnsCorrectly() {
-		int result = CreateShader.FRAGMENT.load("C:\\Users\\Alistair\\Code\\Maoni\\src\\com\\maoni\\shaders\\normalProt.frag.shader");
+		int result = CreateShader.FRAGMENT.load(ClassLoader.getSystemResourceAsStream("com/maoni/shaders/normalProt.frag.shader"));
 		assertTrue(result != 0);
 	}
 	

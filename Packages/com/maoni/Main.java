@@ -9,6 +9,7 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
+import org.lwjgl.util.glu.Sphere;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL15.*;
@@ -25,8 +26,8 @@ import com.maoni.vBuffer.InitializeVertexBuffer;
 public class Main {
 
 	private static final List<Integer> shaderList = new ArrayList<Integer>();
-	private static final String _VERTEX_SHADER_LOCATION = "C:\\Users\\Alistair\\Code\\Maoni\\src\\com\\maoni\\shaders\\normalProt.vert.shader";
-	private static final String _FRAGMENT_SHADER_LOCATION = "C:\\Users\\Alistair\\Code\\Maoni\\src\\com\\maoni\\shaders\\normalProt.frag.shader";
+	private static final String _VERTEX_SHADER_LOCATION = "com/maoni/shaders/normalProt.vert.shader";
+	private static final String _FRAGMENT_SHADER_LOCATION = "com/maoni/shaders/normalProt.frag.shader";
 	private static int _PROGRAM;
 	private static int _PBO;
 	private static int vao;
@@ -37,17 +38,15 @@ public class Main {
 	private static MatrixStack transformStack = new MatrixStack();
 	private static float rotAngle = 0.0f;
 	private static int matrixUniformLoc;
-
-	private static void render() {
-
+    private static void render() {
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClearDepth(1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+		
 		glUseProgram(_PROGRAM);
 		transformStack.push(perspectiveMatrix);
-		transformStack.push(MatrixUtil.INSTANCE.genRotationMatrix(1.0f, 1.0f,
-				1.0f, -rotAngle));
+		transformStack.push(MatrixUtil.INSTANCE.genRotationMatrix(0.0f, 1.0f, 0.0f, -rotAngle));
+
 
 		glUniformMatrix4(matrixUniformLoc, false,
 				MatrixUtil.INSTANCE.genBuffer(transformStack
@@ -85,7 +84,7 @@ public class Main {
 			float fzfar = 1000.0f;
 
 			perspectiveMatrix = ViewPoint.INSTANCE.getPerspectiveMatrix(height,
-					width, fznear, fzfar, 45.0f);
+					width, fznear, fzfar, 35.0f);
 			perspectiveMatrix.mmuli(MatrixUtil.INSTANCE.genTranslateMatrix(0.0f, 0.0f, -1.0f));
 
 			Display.setDisplayMode(new DisplayMode(width, height));
@@ -98,8 +97,8 @@ public class Main {
 			glBindVertexArray(vao);
 
 			// Setup the shader program
-			shaderList.add(CreateShader.VERTEX.load(_VERTEX_SHADER_LOCATION));
-			shaderList.add(CreateShader.FRAGMENT.load(_FRAGMENT_SHADER_LOCATION));
+			shaderList.add(CreateShader.VERTEX.load(ClassLoader.getSystemResourceAsStream(_VERTEX_SHADER_LOCATION)));
+			shaderList.add(CreateShader.FRAGMENT.load(ClassLoader.getSystemResourceAsStream(_FRAGMENT_SHADER_LOCATION)));
 			_PROGRAM = CreateProgram.INSTANCE.create(shaderList);
 
 			// Setup the PositionBufferObject
