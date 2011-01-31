@@ -2,7 +2,7 @@
 <classpath>
 	<classpathentry kind="src" path="Packages"/>
 	<classpathentry kind="src" path="Tests"/>
-	<classpathentry exported="true" kind="lib" path="C:/Users/Alistair/Code/lwjgl-2.6/jar/lwjgl.jar" sourcepath="C:/Users/Alistair/Code/lwjgl-2.6/src">
+	<classpathentry kind="lib" path="C:/Users/Alistair/Code/lwjgl-2.6/jar/lwjgl-debug.jar" sourcepath="C:/Users/Alistair/Code/lwjgl-2.6/src">
 		<attributes>
 			<attribute name="javadoc_location" value="file:/C:/Users/Alistair/Code/lwjgl-2.6/javadoc/"/>
 			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="C:/Users/Alistair/Code/lwjgl-2.6/native/windows"/>

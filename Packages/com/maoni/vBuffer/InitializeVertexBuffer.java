@@ -12,7 +12,7 @@ public enum InitializeVertexBuffer {
 	INSTANCE,
 	;
 	
-	public int createPositionBufferObject(float vertices[]) {
+	public int createVertexBufferObject(float vertices[]) {
 		int positionBufferObject = glGenBuffers();
 		FloatBuffer fb = BufferUtils.createFloatBuffer(vertices.length);
 		fb.put(vertices);
