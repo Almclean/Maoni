@@ -20,7 +20,6 @@ public enum InitializeVertexBuffer {
 		
 		glBindBuffer(GL_ARRAY_BUFFER, positionBufferObject);
 		glBufferData(GL_ARRAY_BUFFER, fb, GL_STATIC_DRAW);
-		glVertexAttribPointer(0, 4, GL_FLOAT, false, 0, 0);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 			
 		return positionBufferObject;
