@@ -21,7 +21,7 @@ import com.maoni.matrix.MatrixUtil;
 import com.maoni.matrix.ViewPoint;
 import com.maoni.shaders.util.CreateProgram;
 import com.maoni.shaders.util.CreateShader;
-import com.maoni.vBuffer.InitializeVertexBuffer;
+import com.maoni.vBuffer.BufferHelper;
 
 public class Main {
 
@@ -31,10 +31,9 @@ public class Main {
 	private static int _PROGRAM;
 	private static int _VBO;
 	private static int vao;
-	private static final float vertexPositions[] = { 0.0f, 0.5f, 0.0f,
-													 1.0f, 0.5f, -0.366f,
-													 0.0f, 1.0f, -0.5f,
-													 -0.366f, 0.0f, 1.0f,
+	private static final float vertexPositions[] = { -1.0f, -0.5f, 0,
+                                                     1.0f, -0.5f, 0,
+												     0.0f,  1.0f, 0,
 													 // Colours for the vertices.
 													 1.0f, 0.0f, 0.0f, 1.0f,
 													 0.0f, 1.0f, 0.0f, 1.0f,
@@ -43,28 +42,38 @@ public class Main {
 	private static MatrixStack transformStack = new MatrixStack();
 	private static float rotAngle = 0.0f;
 	private static int matrixUniformLoc;
+	private static SphereBatch sb;
     private static void render() {
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClearDepth(1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
+		glBindVertexArray(vao);
 		glUseProgram(_PROGRAM);
 		matrixUniformLoc = glGetUniformLocation(_PROGRAM, "mvpMatrix");
 		transformStack.push(perspectiveMatrix);
-		transformStack.push(MatrixUtil.INSTANCE.genRotationMatrix(0.0f, 0.0f, 1.0f, -rotAngle));
-
-		glBindVertexArray(vao);
+		
+		transformStack.push(MatrixUtil.INSTANCE.genRotationMatrix(0.0f, 1.0f, 0.0f, -rotAngle));
+		
+		
 		glUniformMatrix4(matrixUniformLoc, false,
 				MatrixUtil.INSTANCE.genBuffer(transformStack
 						.getModelViewProjection()));
-		glDrawArrays(GL_TRIANGLES, 0, 3);
 		
+		glDrawElements(GL_POINTS, sb.getIndexLength(), GL_UNSIGNED_INT, 0);
+		transformStack.pop();
+		transformStack.push(MatrixUtil.INSTANCE.genRotationMatrix(1.0f, .0f, 0.0f, rotAngle));
+		transformStack.push(MatrixUtil.INSTANCE.genScaleMatrix(1.2f, 1.2f, 1.2f));
+		glUniformMatrix4(matrixUniformLoc, false,
+				MatrixUtil.INSTANCE.genBuffer(transformStack
+						.getModelViewProjection()));
+
+		glDrawElements(GL_POINTS, sb.getIndexLength(), GL_UNSIGNED_INT, 0);
 		glBindVertexArray(0);
 		glUseProgram(0);
 
 		// reset the transformStack.
-		transformStack.pop();
-		transformStack.pop();
+		transformStack.clear();
 		Display.update();
 	}
 
@@ -86,7 +95,7 @@ public class Main {
 
 			perspectiveMatrix = ViewPoint.INSTANCE.getPerspectiveMatrix(height,
 					width, fznear, fzfar, 45.0f);
-			perspectiveMatrix.mmuli(MatrixUtil.INSTANCE.genTranslateMatrix(0.0f, 0.0f, -1.0f));
+			perspectiveMatrix.mmuli(MatrixUtil.INSTANCE.genTranslateMatrix(0.0f, 0.0f, -5.0f));
 
 			Display.setDisplayMode(new DisplayMode(width, height));
 			Display.setVSyncEnabled(true);
@@ -102,18 +111,19 @@ public class Main {
 			// Create the Vao
 			vao = glGenVertexArrays();
 			glBindVertexArray(vao);
-
+			
+			sb = new SphereBatch(3, 300, 100);
 			// Setup the VBO
-			_VBO = InitializeVertexBuffer.INSTANCE
-			.createVertexBufferObject(vertexPositions);
+			_VBO = BufferHelper.INSTANCE
+			.createVertexBufferObject(GL_ARRAY_BUFFER, sb.getVertexCoordData());
 			
 			glBindBuffer(GL_ARRAY_BUFFER, _VBO);
 			glEnableVertexAttribArray(0);
-			glEnableVertexAttribArray(1);
-			glVertexAttribPointer(0, 4, GL_FLOAT, false, 0, 0);
-			glVertexAttribPointer(1, 4, GL_FLOAT, false, 0, 48);
-			glBindBuffer(GL_ARRAY_BUFFER, 0);
+			glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
 			
+			int ebo = BufferHelper.INSTANCE.createElementArrayBufferObject(sb.getIndexData());
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+						
 			glViewport(0, 0, width, height);
 		} catch (LWJGLException e) {
 			e.printStackTrace();
