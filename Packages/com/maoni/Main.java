@@ -9,13 +9,13 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
-import org.lwjgl.util.glu.Sphere;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL30.*;
 
+import com.maoni.batch.SphereBatch;
 import com.maoni.matrix.MatrixStack;
 import com.maoni.matrix.MatrixUtil;
 import com.maoni.matrix.ViewPoint;
@@ -31,18 +31,12 @@ public class Main {
 	private static int _PROGRAM;
 	private static int _VBO;
 	private static int vao;
-	private static final float vertexPositions[] = { -1.0f, -0.5f, 0,
-                                                     1.0f, -0.5f, 0,
-												     0.0f,  1.0f, 0,
-													 // Colours for the vertices.
-													 1.0f, 0.0f, 0.0f, 1.0f,
-													 0.0f, 1.0f, 0.0f, 1.0f,
-													 0.0f, 0.0f, 1.0f, 1.0f, };
 	private static FloatMatrix perspectiveMatrix;
 	private static MatrixStack transformStack = new MatrixStack();
 	private static float rotAngle = 0.0f;
 	private static int matrixUniformLoc;
 	private static SphereBatch sb;
+	
     private static void render() {
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClearDepth(1.0f);

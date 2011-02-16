@@ -1,20 +1,15 @@
 package com.maoni.batch;
 
-import java.util.List;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 
 public interface Batch {
-	
-	// GL-like operations
-	public void Draw(final int shaderProgram);
-	public void Begin();
-	public void End();
-	
-	// Vertex operations
-	public List<Vertex3f> getVertices();
-	public void addVertex(final Vertex3f v);
-	
-	// Texture Coords
-	
-	// Normals
-
+	public FloatBuffer getVertexCoordData();
+	public FloatBuffer getNormalCoordData();
+	public FloatBuffer getTexCoordData();
+	public IntBuffer getIndexData();
+	public int getTextureLength();
+	public int getVertexLength();
+	public int getNormalLength();
+	public int getIndexLength();
 }

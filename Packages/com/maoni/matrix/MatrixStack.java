@@ -18,7 +18,7 @@ public class MatrixStack {
 		this.internalStack.push(MatrixUtil.INSTANCE.genIdentityMatrix4f());
 	}
 
-	public void push(FloatMatrix f) {
+	public void push(final FloatMatrix f) {
 		this.internalStack.push(f);
 	}
 
