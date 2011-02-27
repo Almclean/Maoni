@@ -9,12 +9,14 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
+import com.maoni.modelutil.ObjModelLoader;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL30.*;
 
+import com.maoni.batch.Batch;
 import com.maoni.batch.SphereBatch;
 import com.maoni.matrix.MatrixStack;
 import com.maoni.matrix.MatrixUtil;
@@ -35,7 +37,7 @@ public class Main {
 	private static MatrixStack transformStack = new MatrixStack();
 	private static float rotAngle = 0.0f;
 	private static int matrixUniformLoc;
-	private static SphereBatch sb;
+	private static Batch ob;
 	
     private static void render() {
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -54,15 +56,8 @@ public class Main {
 				MatrixUtil.INSTANCE.genBuffer(transformStack
 						.getModelViewProjection()));
 		
-		glDrawElements(GL_POINTS, sb.getIndexLength(), GL_UNSIGNED_INT, 0);
+		glDrawElements(GL_TRIANGLE_STRIP, ob.getIndexLength(), GL_UNSIGNED_INT, 0);
 		transformStack.pop();
-		transformStack.push(MatrixUtil.INSTANCE.genRotationMatrix(1.0f, .0f, 0.0f, rotAngle));
-		transformStack.push(MatrixUtil.INSTANCE.genScaleMatrix(1.2f, 1.2f, 1.2f));
-		glUniformMatrix4(matrixUniformLoc, false,
-				MatrixUtil.INSTANCE.genBuffer(transformStack
-						.getModelViewProjection()));
-
-		glDrawElements(GL_POINTS, sb.getIndexLength(), GL_UNSIGNED_INT, 0);
 		glBindVertexArray(0);
 		glUseProgram(0);
 
@@ -85,11 +80,11 @@ public class Main {
 			int height = 768;
 
 			float fznear = 1.0f;
-			float fzfar = 100.0f;
+			float fzfar = 1000.0f;
 
 			perspectiveMatrix = ViewPoint.INSTANCE.getPerspectiveMatrix(height,
 					width, fznear, fzfar, 45.0f);
-			perspectiveMatrix.mmuli(MatrixUtil.INSTANCE.genTranslateMatrix(0.0f, 0.0f, -5.0f));
+			perspectiveMatrix.mmuli(MatrixUtil.INSTANCE.genTranslateMatrix(0.0f, -35.0f, -200.0f));
 
 			Display.setDisplayMode(new DisplayMode(width, height));
 			Display.setVSyncEnabled(true);
@@ -106,16 +101,19 @@ public class Main {
 			vao = glGenVertexArrays();
 			glBindVertexArray(vao);
 			
-			sb = new SphereBatch(3, 300, 100);
+			ob = ObjModelLoader.INSTANCE.createBatch(ClassLoader.getSystemResourceAsStream("com/maoni/models/bendychair.obj"));
+			System.out.println("Number of vertices = " + ob.getVertexLength());
+			System.out.println("Number of indices = " + ob.getIndexLength());
+			
 			// Setup the VBO
 			_VBO = BufferHelper.INSTANCE
-			.createVertexBufferObject(GL_ARRAY_BUFFER, sb.getVertexCoordData());
+			.createVertexBufferObject(GL_ARRAY_BUFFER, ob.getVertexCoordData());
 			
 			glBindBuffer(GL_ARRAY_BUFFER, _VBO);
 			glEnableVertexAttribArray(0);
 			glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
 			
-			int ebo = BufferHelper.INSTANCE.createElementArrayBufferObject(sb.getIndexData());
+			int ebo = BufferHelper.INSTANCE.createElementArrayBufferObject(ob.getIndexData());
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
 						
 			glViewport(0, 0, width, height);
