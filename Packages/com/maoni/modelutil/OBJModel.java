@@ -16,10 +16,10 @@ public class OBJModel {
 		this.normalCoords = new ArrayList<Float>();
 	}
 
-	protected void parseVertexData(final String vertexdata) {
+	public void parseVertexData(final String vertexdata) {
 
 		String[] results = vertexdata.split(" +");
-
+		
 		if (!results[0].equals("v")) {
 			throw new IllegalArgumentException(
 					"Encountered malformed vertex line : " + vertexdata);
@@ -35,20 +35,20 @@ public class OBJModel {
 		}
 	}
 
-	protected void parseFaceVertexData(final String faceData) {
+	public void parseFaceVertexData(final String faceData) {
 		String[] results = faceData.split(" +");
 
 		if (!results[0].equals("f")) {
 			throw new IllegalArgumentException(
 					"Encountered malformed face line : " + faceData);
 		} else {
-			indices.add(Math.abs(Integer.parseInt(results[1].split("/")[0])));
-			indices.add(Math.abs(Integer.parseInt(results[2].split("/")[0])));
-			indices.add(Math.abs(Integer.parseInt(results[3].split("/")[0])));
+			indices.add(Math.abs(Integer.parseInt(results[1].split("/")[0])) - 1);
+			indices.add(Math.abs(Integer.parseInt(results[2].split("/")[0])) - 1);
+			indices.add(Math.abs(Integer.parseInt(results[3].split("/")[0])) - 1);
 		}
 	}
 
-	protected void parseTextureData(final String texData) {
+	public void parseTextureData(final String texData) {
 
 		String[] results = texData.split(" +");
 
@@ -62,7 +62,7 @@ public class OBJModel {
 		}
 	}
 
-	protected void parseNormalData(String normalData) {
+	public void parseNormalData(String normalData) {
 		String[] results = normalData.split(" +");
 
 		if (!results[0].equals("vn")) {
@@ -91,6 +91,19 @@ public class OBJModel {
 
 	public List<Float> getNormalCoords() {
 		return this.normalCoords;
+	}
+	
+	public void writeOutFaceData() {
+		for (Integer i : this.getIndices()) {
+			System.out.println(i);
+		}
+	}
+
+	public void writeOutVertexData() {
+		for (Float f : this.getVertices()) {
+			System.out.println(f);
+		}
+		
 	}
 
 }

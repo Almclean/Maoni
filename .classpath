@@ -12,5 +12,6 @@
 	<classpathentry exported="true" kind="lib" path="C:/Users/Alistair/Code/lwjgl-2.6/jar/lwjgl_util.jar" sourcepath="C:/Users/Alistair/Code/lwjgl-2.6/src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
+	<classpathentry kind="lib" path="C:/Users/Alistair/Code/slick-util.jar" sourcepath="C:/Users/Alistair/Code/slick-util-src.zip"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

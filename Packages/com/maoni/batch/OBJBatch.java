@@ -40,7 +40,6 @@ public class OBJBatch implements Batch {
 			iData.put(i);
 		}
 		iData.rewind();
-		
 	}
 	
 	
